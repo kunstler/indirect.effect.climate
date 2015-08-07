@@ -1,0 +1,6 @@
+var,units,description
+site,NA,short name of the site
+Tmin,ÁC,minimum temperature over the growing season
+VPD,Pa,mean of the vapour pressure deficit over the growing season 
+SWC,%,soil mean water content during the growing season
+DDS,degree C,degree days sum above 5.56C estimated on each block and each year

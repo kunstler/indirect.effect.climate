@@ -1,0 +1,13 @@
+var,units,description
+plot.year.id,NA,plot x year id
+site,NA,short name of the site
+block,NA,block id
+sampling.point,NA,sampling point id (4 sampling point per plot)
+date,NA,date of measurement
+year,NA,year
+ground_vegetation_treatment,NA,V : vegetation NV no vegetation
+light.H20,%,light above ground vegetation (20cm height)
+light.H0,%,light below ground vegetation (0cm height)
+cover,%,ground vegetation cover
+dds,degree C,degree days sum above 5.56C estimated on each block and each year
+transmitted_light,%,percentage of light below the adult tree canopy

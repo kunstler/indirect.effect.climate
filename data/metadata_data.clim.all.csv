@@ -1,0 +1,21 @@
+var,units,description
+block,NA,block id
+site,NA,short name of the site
+plot,NA,plot id
+date,NA,date of measurement
+year,NA,year
+ground_vegetation_treatment,NA,V : vegetation NV no vegetation
+moy.rh,%,daily mean air humidity in percentage
+max.rh,%,daily maximum air humidity in percentage
+min.rh,%,daily minimum air humidity in percentage
+moy.t.air,degree C,daily mean air humidity in percentage
+max.t.air,degree C,daily maximum air humidity in percentage
+min.t.air,degree C,daily minimum air humidity in percentage
+moy.t.sol,degree C,daily mean sol humidity in percentage
+max.t.sol,degree C,daily maximum sol humidity in percentage
+min.t.sol,degree C,daily minimum sol humidity in percentage
+dds,degree C,degree days sum above 5.56C estimated on each block and each year
+transmitted_light,%,percentage of light below the adult tree canopy
+SWC.season,%,mean soil mean water content during the growing season 
+VPD.season,Pa,mean of the vapour pressure deficit over the growing season
+ID.week.index,NA,ID of the week
