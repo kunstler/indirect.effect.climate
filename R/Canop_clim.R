@@ -2,35 +2,25 @@
 ####################################
 ## Analyse of effect on climatic variables
 ## Defossez et al. Oikos in revision
-
-
-library(R2jags)
-source(file.path('R', 'fun.fit.R'))
-
-#####
-jags.dir <- 'jags.output'
-dir.create(jags.dir, showWarnings = FALSE)
-output.dir <- 'output'
-dir.create(output.dir, showWarnings = FALSE)
-figs.dir <- 'figs'
-dir.create(figs.dir, showWarnings = FALSE)
-data.dir <- 'data'
+Sys.setlocale('LC_ALL','C') 
 
 ## read data
+fun.canop.clim.jags <- function(var.n, 
+                                clim.data.name,
+                                vars.clim = c('SWC_effect', 'VPD_effect', 'Tmin_effect'),
+                                output.dir = 'output',
+                                jags.model.dir = 'jags.model'){
+library(R2jags)
 
-data.clim <- read.csv(file.path(data.dir, 'data.climate.all.csv'))
+data.clim <- read.csv(clim.data.name)
 
 data.canopy <- fun.data.canopy(data.clim)
 
+var.c <- vars.clim[var.n]
 
-#############################
-## data for JAGS CANOPY
-
-vars.clim <- c('SWC_effect', 'VPD_effect', 'Tmin_effect')
 
 # NUMBER OF CHAINS TO RUN
 nchains <-  4
-for (var.c in vars.clim){
  #### format data per climatic variables
  jags.data <- format.jags.data.clim(data.canopy, var.c)
 
@@ -42,11 +32,11 @@ for (var.c in vars.clim){
  ### SEND to jags
  clim.NULL <-jags(data=jags.data,
                   inits=jags.inits,
-                  model.file = file.path("jags.model.clim.NULL"),
+                  model.file = file.path(jags.model.dir,
+                      "jags.model.clim.NULL"),
                   parameters.to.save = c("param","tauC"),
                   n.chains = nchains,
                   n.iter = 70000,
-                  working.directory =jags.dir,
                   n.burnin=20000,n.thin=50)
 
  ##################
@@ -57,16 +47,12 @@ for (var.c in vars.clim){
  ### SEND to jags
  clim.L <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "jags.model.clim.L"),
+                        model.file = file.path(jags.model.dir,
+                                               "jags.model.clim.L"),
                         parameters.to.save = c("param","tauC"),
                         n.chains = nchains,
                         n.iter = 70000,
                         n.burnin=20000,n.thin=50)
-
- # SAVE PLOT OF RESULTS
- pdf(file.path(jags.dir,paste0('jags.canop', var.c, '.pdf')))
- plot(clim.L)
- dev.off()
 
  # WARNINGS OF BAD CONVERGENCE
 if(any(clim.L$BUGSoutput$summary[, 'Rhat']>1.1))
@@ -81,6 +67,11 @@ if(any(clim.L$BUGSoutput$summary[, 'Rhat']>1.1))
 
 ####################
 ## ADD DIC TABLE
+fun.dic.table.canop <- function(vars.clim = c('SWC_effect', 'VPD_effect',
+                                    'Tmin_effect'),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
+
 CANOPY.DIC.table <- matrix(NA,nrow=length(vars.clim),ncol=2)
 rownames(CANOPY.DIC.table) <- vars.clim
 colnames(CANOPY.DIC.table) <- c("NULL", "CANOP")
@@ -95,26 +86,31 @@ colnames(CANOPY.DIC.table) <- c("NULL", "CANOP")
 write.csv(CANOPY.DIC.table,file.path(output.dir, "CANOPY.DIC.table.csv"))
 
 (CANOPY.DIC.table) -apply(CANOPY.DIC.table, MARGIN = 1, min)
+}
 
+fun.canop.cover.jags <- function(data.herb.light.name,
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
 
 #####################
 ##### HERB INTERCEPTED LIGHT
-data.herb.light <- read.csv(file.path(data.dir, 'data.herb.light.csv'))
+data.herb.light <- read.csv(data.herb.light.name)
 jags.data <- format.jags.data.herb(data.herb.light, 'cover')
 
  ##################
  #### NULL MODEL
  #### Inits
+ nchains <-  4
  jags.inits <- lapply(1:nchains, inits.clim, n.param = 1)
 
  ### SEND to jags
  clim.NULL <-jags(data=jags.data,
                   inits=jags.inits,
-                  model.file = file.path("jags.model.clim.NULL"),
+                  model.file = file.path(jags.model.dir,
+                      "jags.model.clim.NULL"),
                   parameters.to.save = c("param","tauC"),
                   n.chains = nchains,
                   n.iter = 70000,
-                  working.directory =jags.dir,
                   n.burnin=20000,n.thin=50)
 
  ##################
@@ -131,13 +127,10 @@ jags.data <- format.jags.data.herb(data.herb.light, 'cover')
                         n.iter = 70000,
                         n.burnin=20000,n.thin=50)
 
- # SAVE PLOT OF RESULTS
- pdf(file.path(jags.dir,paste0('jags.canop', 'cover', '.pdf')))
- plot(clim.L)
- dev.off()
 
  # WARNINGS OF BAD CONVERGENCE
- if(any(clim.L$BUGSoutput$summary[, 'Rhat']>1.1)) stop('badconvergence Rhat > 1.1')
+ if(any(clim.L$BUGSoutput$summary[, 'Rhat']>1.1))
+     stop('badconvergence Rhat > 1.1')
  # SAVE OUTPUTS
  obj.save <- list(clim.NULL, clim.L)
  save(obj.save,
@@ -147,9 +140,13 @@ jags.data <- format.jags.data.herb(data.herb.light, 'cover')
 ### DIC
 c(obj.save[[1]]$BUGSoutput$DIC,
   obj.save[[2]]$BUGSoutput$DIC)
-
+}
 
 ## PLOT
+fun.predict.plot.canop <- function(clim.data.name,data.herb.light.name, vars.clim= c('SWC_effect', 'VPD_effect',
+                                    'Tmin_effect'),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
 ylab.vec <- c("Site centred SWC (%)",
               "Site centred VPD (Pa)",
               "Site centred Tmin °C")
@@ -159,7 +156,11 @@ names(lab.vec) <- vars.clim
 y.t.lab <- c(13, 260, 1.15)
 names(y.t.lab) <- vars.clim
 
-pdf(file.path(figs.dir, 'fig.effect.clim.canopy.pdf'))
+data.clim <- read.csv(clim.data.name)
+
+data.canopy <- fun.data.canopy(data.clim)
+data.herb.light <- read.csv(data.herb.light.name)
+
 
 par(mfrow=c(2,2))
 for (var.c in vars.clim){
@@ -253,8 +254,7 @@ lines(light.plot,rev(mean.quant.herb[2,]),lty=2,lwd=1)
 boxplot(temp.herb2~i,add=T,at=x$mids,outline=F,boxwex=4,xaxt = "n")
 text(98, 98, '(d)')
 
-dev.off()
-
+}
 
 
 

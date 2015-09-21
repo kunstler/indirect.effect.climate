@@ -2,34 +2,25 @@
 ####################################
 ## Analyse of effect on climatic variables
 ## Defossez et al. Oikos in revision
+Sys.setlocale('LC_ALL','C') 
 
-
-library(R2jags)
-source(file.path('R', 'fun.fit.R'))
-
-#####
-jags.dir <- 'jags.output'
-dir.create(jags.dir, showWarnings = FALSE)
-output.dir <- 'output'
-dir.create(output.dir, showWarnings = FALSE)
-figs.dir <- 'figs'
-dir.create(figs.dir, showWarnings = FALSE)
-data.dir <- 'data'
 
 ## read data
-
-data.clim <- read.csv(file.path(data.dir, 'data.climate.all.csv'))
-
+fun.herb.clim.jags <- function(var.n,
+                               clim.data.name,
+                               vars.clim = c('delta.SWC', 'delta.VPD', 'delta.Tmin'),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
+library(R2jags)
+data.clim <- read.csv(clim.data.name)
 ## format data
 data.herb <- fun.data.herb(data.clim)
 
 #############################
 ## SEND JAGS MODEL HERBS
-vars.clim <- c('delta.SWC', 'delta.VPD', 'delta.Tmin')
-
-# NUMBER OF CHAINS TO RUN
-nchains <-  4
-for (var.c in vars.clim){
+var.c <- vars.clim[var.n]
+ # NUMBER OF CHAINS TO RUN
+ nchains <-  4
  #### format data per climatic variables
  jags.data <- format.jags.data.clim(data.herb, var.c)
 
@@ -41,11 +32,10 @@ for (var.c in vars.clim){
  ### SEND to jags
  clim.NULL <-jags(data=jags.data,
                   inits=jags.inits,
-                  model.file = file.path("jags.model.clim.NULL"),
+                  model.file = file.path(jags.model.dir, "jags.model.clim.NULL"),
                   parameters.to.save = c("param","tauC"),
                   n.chains = nchains,
                   n.iter = 70000,
-                  working.directory =jags.dir,
                   n.burnin=20000,n.thin=50)
 
  ##################
@@ -56,16 +46,13 @@ for (var.c in vars.clim){
  ### SEND to jags
  clim.L <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "jags.model.clim.L"),
+                        model.file = file.path(jags.model.dir,
+                            "jags.model.clim.L"),
                         parameters.to.save = c("param","tauC"),
                         n.chains = nchains,
                         n.iter = 70000,
                         n.burnin=20000,n.thin=50)
 
- # SAVE PLOT OF RESULTS
- pdf(file.path(jags.dir,paste0('jags.herb', var.c, '.pdf')))
- plot(clim.L)
- dev.off()
 
  # WARNINGS OF BAD CONVERGENCE
  if(any(clim.L$BUGSoutput$summary[, 'Rhat']>1.1)) stop('badconvergence Rhat > 1.1')
@@ -79,6 +66,9 @@ for (var.c in vars.clim){
 
 ####################
 ## DIC TABLE
+fun.dic.table.herb <- function(vars.clim = c('delta.SWC', 'delta.VPD', 'delta.Tmin'),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
 HERB.DIC.table <- matrix(NA,nrow=length(vars.clim),ncol=2)
 rownames(HERB.DIC.table) <- vars.clim
 colnames(HERB.DIC.table) <- c("NULL", "CANOP")
@@ -93,27 +83,33 @@ colnames(HERB.DIC.table) <- c("NULL", "CANOP")
 write.csv(HERB.DIC.table,file.path(output.dir, "HERB.DIC.table.csv"))
 
 (HERB.DIC.table) -apply(HERB.DIC.table, MARGIN = 1, min)
-
+}
 
 #####################
 ##### HERB INTERCEPTED LIGHT
-data.herb.light <- read.csv(file.path(data.dir, 'data.herb.light.csv'))
+
+fun.herb.light.jags <- function(data.herb.light.name,
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
+library(R2jags)
+data.herb.light <- read.csv(data.herb.light.name)
 data.herb.light$light <-  100 - 100*(data.herb.light$light.H0  / data.herb.light$light.H20)
 jags.data <- format.jags.data.herb(data.herb.light, 'light')
 
  ##################
  #### NULL MODEL
  #### Inits
+ nchains <-  4
  jags.inits <- lapply(1:nchains, inits.clim, n.param = 1)
 
  ### SEND to jags
  clim.NULL <-jags(data=jags.data,
                   inits=jags.inits,
-                  model.file = file.path("jags.model.clim.NULL"),
+                  model.file = file.path(jags.model.dir,
+                      "jags.model.clim.NULL"),
                   parameters.to.save = c("param","tauC"),
                   n.chains = nchains,
                   n.iter = 70000,
-                  working.directory =jags.dir,
                   n.burnin=20000,n.thin=50)
 
  ##################
@@ -124,16 +120,12 @@ jags.data <- format.jags.data.herb(data.herb.light, 'light')
  ### SEND to jags
  clim.L <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "jags.model.clim.L"),
+                        model.file = file.path(jags.model.dir, "jags.model.clim.L"),
                         parameters.to.save = c("param","tauC"),
                         n.chains = nchains,
                         n.iter = 70000,
                         n.burnin=20000,n.thin=50)
 
- # SAVE PLOT OF RESULTS
- pdf(file.path(jags.dir,paste0('jags.herb', 'light', '.pdf')))
- plot(clim.L)
- dev.off()
 
  # WARNINGS OF BAD CONVERGENCE
  if(any(clim.L$BUGSoutput$summary[, 'Rhat']>1.1)) stop('badconvergence Rhat > 1.1')
@@ -144,9 +136,9 @@ jags.data <- format.jags.data.herb(data.herb.light, 'light')
                       paste0("herb.res.", 'light', ".Rdata")))
 
 ### DIC
-c(obj.save[[1]]$BUGSoutput$DIC,
-  obj.save[[2]]$BUGSoutput$DIC)
-
+print(c(obj.save[[1]]$BUGSoutput$DIC,
+  obj.save[[2]]$BUGSoutput$DIC))
+}
 
 
 
@@ -154,7 +146,11 @@ c(obj.save[[1]]$BUGSoutput$DIC,
 # Compute PREDICTION
 # an plot
 
-
+fun.predict.plot.herb <- function(clim.data.name,data.herb.light.name,
+                               vars.clim=c('delta.SWC', 'delta.VPD',
+                                      'delta.Tmin'),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
 ylab.vec <- c(expression(Delta ~ "SWC"["V" ~ -~"NV"] ~ "(%)"),
               expression(Delta ~ "VPD"["V" ~ -~"NV"] ~ "(Pa)"),
               expression(Delta ~ "Tmin"["V" ~ -~"NV"] ~ "(°C)"))
@@ -164,7 +160,12 @@ names(lab.vec) <- vars.clim
 y.t.lab <- c(11.5, 200, 0.4)
 names(y.t.lab) <- vars.clim
 
-pdf(file.path(figs.dir, 'fig.effect.clim.herb.pdf'))
+data.clim <- read.csv(clim.data.name)
+## format data
+data.herb <- fun.data.herb(data.clim)
+data.herb.light <- read.csv(data.herb.light.name)
+data.herb.light$light <-  100 - 100*(data.herb.light$light.H0  / data.herb.light$light.H20)
+
 
 par(mfrow=c(2,2))
 for (var.c in vars.clim){
@@ -246,5 +247,4 @@ lines(light.plot,rev(mean.quant.herb[2,]),lty=2,lwd=1)
 boxplot(temp.herb2~i,add=T,at=x$mids,outline=F,boxwex=4,xaxt = "n")
 text(98, 88, '(d)')
 
-dev.off()
-
+}

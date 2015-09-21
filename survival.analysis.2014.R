@@ -4,23 +4,14 @@
 ## seedling survival
 ## Defossez et al. Oikos in revision
 
-
+fun.surv.jags <- function(sp.n, data.seedling.survival.name,
+                          species = c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
+             "Fagus.sylvatica", "Quercus.petraea"),
+                          jags.model.dir = 'jags.model',
+                          output.dir = 'output'){
 library(R2jags)
-source(file.path('R', 'fun.fit.R'))
-source(file.path('R', 'R2mc.Defossez.R'))
 
-##### dir creation
-jags.dir <- 'jags.output'
-dir.create(jags.dir, showWarnings = FALSE)
-output.dir <- 'output'
-dir.create(output.dir, showWarnings = FALSE)
-figs.dir <- 'figs'
-dir.create(figs.dir, showWarnings = FALSE)
-data.dir <- 'data'
-
-
-data.survival <- read.csv(file=file.path(data.dir,
-                                         "data.seedling.survival.csv"),
+data.survival <- read.csv(file=data.seedling.survival.name,
                           sep = ',')
 
 ### remove indiv with missing data
@@ -28,19 +19,13 @@ data.survival <- subset(data.survival, !is.na(transmitted_light))# light
 data.survival <- subset(data.survival, !is.na(dds))# DDS
 data.survival <- subset(data.survival, !is.na(seedlings_survival))# survival
 
-# species vector
-species <- c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
-             "Fagus.sylvatica", "Quercus.petraea")
-
-
+# species selected
+sp <- species[sp.n]
 #################################
 ##### MCMC ESTIMATION WITH JAGS
 
-## LOOP OVER SPECIES TO ESTIME MODELS FOR EACH
-
 # NUMBER OF CHAINS TO RUN
 nchains <-  4
-for (sp in species){
  #### format data per species
  jags.data <- format.data.survival(sp, data.survival)
 
@@ -52,7 +37,7 @@ for (sp in species){
  ### SEND to jags
  Survival.null <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "SURVIVAL.MODEL.NULL"),
+                        model.file = file.path(jags.model.dir, "SURVIVAL.MODEL.NULL"),
                         parameters.to.save = c("BLOC","tauBLOC"),
                         n.chains = nchains,
                         n.iter = 70000,
@@ -66,7 +51,7 @@ for (sp in species){
  ### SEND to jags
  Survival.T <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "SURVIVAL.MODEL.T"),
+                        model.file = file.path(jags.model.dir, "SURVIVAL.MODEL.T"),
                         parameters.to.save = c("BLOC","tauBLOC", "param"),
                         n.chains = nchains,
                         n.iter = 70000,
@@ -80,16 +65,12 @@ for (sp in species){
  ### SEND to jags
  Survival.inter <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "SURVIVAL.MODEL.INTER"),
+                        model.file = file.path(jags.model.dir, "SURVIVAL.MODEL.INTER"),
                         parameters.to.save = c("param","BLOC","tauBLOC"),
                         n.chains = nchains,
                         n.iter = 70000,
                         n.burnin=20000,n.thin=50)
 
- # SAVE PLOT OF RESULTS
- pdf(file.path(jags.dir,paste0('jags.surv', sp, '.pdf')))
- plot(Survival.inter)
- dev.off()
 
  # WARNINGS OF BAD CONVERGENCE
 if(any(Survival.inter$BUGSoutput$summary[, 'Rhat']>1.1)) stop('badconvergence Rhat > 1.1')
@@ -99,6 +80,12 @@ if(any(Survival.inter$BUGSoutput$summary[, 'Rhat']>1.1)) stop('badconvergence Rh
       file = file.path(output.dir,
                       paste0("survival.res.", sp, ".Rdata")))
 }
+
+
+fun.dic.table.canop <- function(species = c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
+             "Fagus.sylvatica", "Quercus.petraea"),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
 
 ## BUILD DIC TABLE
 SURVIVAL.DIC.table <- matrix(NA,nrow=length(species),ncol=3)
@@ -116,9 +103,27 @@ colnames(SURVIVAL.DIC.table) <- c("NULL", "T", "ALL_INTER")
 write.csv(SURVIVAL.DIC.table,file.path(output.dir, "SURVIVAL.DIC.table.csv"))
 
 (SURVIVAL.DIC.table) -apply(SURVIVAL.DIC.table, MARGIN = 1, min)
+}
 
+
+
+
+fun.R2.table.canop <- function(data.seedling.survival.name,
+                              species = c("Pinus.uncinata", "Larix.decidua",
+                                          "Abies.alba", "Fagus.sylvatica",
+                                          "Quercus.petraea"),
+                               output.dir = 'output',
+                               jags.model.dir = 'jags.model'){
 #########################
 ### COMPUTE R2m and R2c
+data.survival <- read.csv(file=data.seedling.survival.name,
+                          sep = ',')
+
+### remove indiv with missing data
+data.survival <- subset(data.survival, !is.na(transmitted_light))# light
+data.survival <- subset(data.survival, !is.na(dds))# DDS
+data.survival <- subset(data.survival, !is.na(seedlings_survival))# survival
+
 SURVIVAL.R2.table <- matrix(NA,nrow=length(species),ncol=2)
 rownames(SURVIVAL.R2.table) <- species
 colnames(SURVIVAL.R2.table) <- c("R2m", "R2c")
@@ -137,13 +142,32 @@ colnames(SURVIVAL.R2.table) <- c("R2m", "R2c")
 }
 
 write.csv(SURVIVAL.R2.table,file.path(output.dir, "SURVIVAL.R2.table.csv"))
-
+}
 
 
 #######################################
 #### Predict interaction coeffcient
-species <- c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
-             "Fagus.sylvatica")
+
+fun.surv.jags <- function( data.seedling.survival.name,
+                          species = c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
+             "Fagus.sylvatica", "Quercus.petraea"),
+                          jags.model.dir = 'jags.model',
+                          output.dir = 'output'){
+
+data.survival <- read.csv(file=data.seedling.survival.name,
+                          sep = ',')
+
+### remove indiv with missing data
+data.survival <- subset(data.survival, !is.na(transmitted_light))# light
+data.survival <- subset(data.survival, !is.na(dds))# DDS
+data.survival <- subset(data.survival, !is.na(seedlings_survival))# survival
+
+
+# NUMBER OF CHAINS TO RUN
+nchains <-  4
+ #### format data per species
+ jags.data <- format.data.survival(sp, data.survival)
+
 
 for (j in species)
 {
@@ -201,7 +225,6 @@ dat$labs <- as.character(dat$labs)
 dat$labs[dat$param != 'Ground vegetation direct effect'] <- ''
 
 
-pdf(file.path(figs.dir, 'fig.effect.survival.ggplot.pdf'))
 ggplot(df.tot, aes(x = temp, y = mean)) +
   geom_line(aes(x = temp, y = mean)) +
   geom_ribbon(aes(ymin=quant.l, ymax=quant.h, show_guide=FALSE, linetype = NA),
@@ -216,6 +239,5 @@ ggplot(df.tot, aes(x = temp, y = mean)) +
   xlab('Degree Day Sum (>5.5°C)') +
   ylab('Interaction coefficient estimates from seedling survival')+
   theme(strip.text.y = element_text(size = 0), strip.text.x = element_text(size = 9, face = 'bold'))
-dev.off()
-
+}
 

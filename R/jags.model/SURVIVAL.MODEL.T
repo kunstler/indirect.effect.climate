@@ -1,0 +1,28 @@
+
+ #### SURVIVAL model with BUGGS ###
+ model {
+ ### Likelihood ###
+     for (i in 1:N.indiv) {
+ ## logistic regression
+ Survie[i] ~ dbern(ppp[i])
+ ##enviro effect on the bernouilli
+ logit(ppp[i]) <- param[1] +
+                param[2]*Tair[i] + BLOC[num.bloc[i]]
+}
+ ##################
+ ####  priors
+
+ #### Hierarchical parameters ###
+for (n in 1:Nbloc)
+{
+    BLOC[n]~dnorm(0,tauBLOC)
+}
+ ### Non-hierarchical parameters ###
+tauBLOC ~ dgamma(0.001,0.001)
+for (j in 1:2)
+{
+param[j] ~dnorm(0,1.0E-6)
+}
+
+ } # End of the jags model
+ 

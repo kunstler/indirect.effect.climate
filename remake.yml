@@ -1,0 +1,115 @@
+packages:
+  - R2jags
+  - ggplot2
+
+sources:
+  - R
+
+plot_options:
+  tall:
+    height: 6.5
+    width: 5.5
+  wide:
+    height: 3.5
+    width: 7
+  skinny:
+    height: 4.5
+    width: 3
+  square:
+    height: 5.5
+    width: 5.5
+  large_square:
+    height: 7
+    width: 7
+
+knitr_options:
+  vignette:
+    auto_figure_prefix: true
+    chdir: true
+
+targets:
+  all:
+    depends:
+      - figures/clim_cor.pdf
+
+  figures:
+    depends:
+      - figures/clim_cor.pdf
+      - figures/fig_effect_clim_herb.pdf
+      - figures/fig_effect_clim_canopy.pdf
+
+# Data sources and figures  ###################################################
+
+  figures/clim_cor.pdf:
+    command: fig.clim.cor("download/data.clim.mean.csv", "output/mat_pca.csv")
+    plot: square
+
+  figures/fig_effect_clim_herb.pdf:
+    command: fun.predict.plot.herb('download/data.climate.all.csv',
+                                   'download/data.herb.light.csv')
+    plot: large_square
+    depends:
+    - output/herb.res.delta.SWC.Rdata
+    - output/herb.res.delta.VPD.Rdata
+    - output/herb.res.delta.Tmin.Rdata
+    - output/herb.res.light.Rdata
+    - output/HERB.DIC.table.csv:
+
+  figures/fig_effect_clim_canopy.pdf:
+    command: fun.predict.plot.canop('download/data.climate.all.csv',
+                                   'download/data.herb.light.csv')
+    plot: large_square
+    depends:
+    - output/canop.res.SWC_effect.Rdata
+    - output/canop.res.VPD_effect.Rdata
+    - output/canop.res.Tmin_effect.Rdata
+    - output/canop.res.cover.Rdata
+    - output/CANOPY.DIC.table.csv:
+
+  output/mat_pca.csv:
+    command: pca.clim("download/data.clim.mean.csv")
+
+  output/CANOPY.DIC.table.csv:
+    command: fun.dic.table.canop()
+
+  output/HERB.DIC.table.csv:
+    command: fun.dic.table.herb()
+
+  output/herb.res.delta.SWC.Rdata:
+    command: fun.herb.clim.jags(1, 'download/data.climate.all.csv')
+
+  output/herb.res.delta.VPD.Rdata:
+    command: fun.herb.clim.jags(2, 'download/data.climate.all.csv')
+
+  output/herb.res.delta.Tmin.Rdata:
+    command: fun.herb.clim.jags(3,'download/data.climate.all.csv')
+
+  output/herb.res.light.Rdata:
+    command: fun.herb.light.jags('download/data.herb.light.csv')
+
+  output/canop.res.SWC_effect.Rdata:
+    command: fun.canop.clim.jags(1, 'download/data.climate.all.csv')
+
+  output/canop.res.VPD_effect.Rdata:
+    command: fun.canop.clim.jags(2, 'download/data.climate.all.csv')
+
+  output/canop.res.Tmin_effect.Rdata:
+    command: fun.canop.clim.jags(3, 'download/data.climate.all.csv')
+
+  output/canop.res.cover.Rdata:
+    command: fun.canop.cover.jags('download/data.herb.light.csv')
+
+  download/data.clim.mean.csv:
+    download: "http://datadryad.org/bitstream/handle/10255/dryad.94719/data.clim.mean.csv"
+
+  download/data.herb.light.csv:
+    download: "http://datadryad.org/bitstream/handle/10255/dryad.94713/data.herb.light.csv"
+
+  download/data.climate.all.csv:
+    download: "http://datadryad.org/bitstream/handle/10255/dryad.94709/data.climate.all.csv"
+
+  download/data.seedling.survival.csv:
+    download: "http://datadryad.org/bitstream/handle/10255/dryad.94693/data.seedling.survival.csv"
+
+  download/data.seedling.growth.csv:
+    download: "http://datadryad.org/bitstream/handle/10255/dryad.94693/data.seedling.growth.csv"

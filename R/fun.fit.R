@@ -2,7 +2,7 @@
 ##########################
 ## FUNCTIONS FOR JAGS FIT
 
-jags.dir <- 'jags.output'
+jags.dir <- 'jags.model'
 dir.create(jags.dir, showWarnings = FALSE)
 
 
