@@ -3,7 +3,7 @@
 This repository list the files used in the analysis of ground vegetation and
 adult canopy direct and indirect effect on tree seedlings survival and growth
 along climatic gradient for five species in the French Alps ([Defossez
-et al. 2015](http://onlinelibrary.wiley.com/doi/10.1111/oik.02331/abstract). Variation of micro-environmental variables with ground vegetation and canopy cover is analysed. The
+et al. 2015](http://onlinelibrary.wiley.com/doi/10.1111/oik.02331/abstract)). Variation of micro-environmental variables with ground vegetation and canopy cover is analysed. The
 R scripts use [JAGS](http://mcmc-jags.sourceforge.net/) and
 [R2jags](http://cran.r-project.org/web/packages/R2jags/index.html) and
 also require [ggplot2](http://ggplot2.org/) for the figures. The R
