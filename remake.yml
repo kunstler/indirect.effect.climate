@@ -30,13 +30,23 @@ knitr_options:
 targets:
   all:
     depends:
-      - figures/clim_cor.pdf
-
+      - figures
+      - output
   figures:
     depends:
       - figures/clim_cor.pdf
       - figures/fig_effect_clim_herb.pdf
       - figures/fig_effect_clim_canopy.pdf
+      - figures/fig_effect_growth_ggplot.pdf
+      - figures/fig_effect_survival_ggplot.pdf
+  output:
+    depends:
+      - output/HERB.DIC.table.csv
+      - output/CANOPY.DIC.table.csv
+      - output/SURVIVAL.DIC.table.csv
+      - output/GROWTH.DIC.table.csv
+      - output/SURVIVAL.R2.table.csv
+
 
 # Data sources and figures  ###################################################
 
@@ -66,6 +76,28 @@ targets:
     - output/canop.res.cover.Rdata
     - output/CANOPY.DIC.table.csv:
 
+  figures/fig_effect_survival_ggplot.pdf:
+    command: fun.surv.plot('download/data.seedling.survival.csv')
+    plot: large_square
+    depends:
+    - output/survival.res.Pinus.uncinata.Rdata
+    - output/survival.res.Larix.decidua.Rdata
+    - output/survival.res.Abies.alba.Rdata
+    - output/survival.res.Fagus.sylvatica.Rdata
+    - output/survival.res.Quercus.petraea.Rdata
+    - output/SURVIVAL.DIC.table.csv:
+
+  figures/fig_effect_growth_ggplot.pdf:
+    command: fun.growth.plot('download/data.seedling.growth.csv')
+    plot: large_square
+    depends:
+    - output/growth.res.Pinus.uncinata.Rdata
+    - output/growth.res.Larix.decidua.Rdata
+    - output/growth.res.Abies.alba.Rdata
+    - output/growth.res.Fagus.sylvatica.Rdata
+    - output/growth.res.Quercus.petraea.Rdata
+    - output/GROWTH.DIC.table.csv:
+
   output/mat_pca.csv:
     command: pca.clim("download/data.clim.mean.csv")
 
@@ -74,6 +106,15 @@ targets:
 
   output/HERB.DIC.table.csv:
     command: fun.dic.table.herb()
+
+  output/SURVIVAL.DIC.table.csv:
+    command: fun.dic.table.surv()
+
+  output/GROWTH.DIC.table.csv:
+    command: fun.dic.table.growth()
+
+  output/SURVIVAL.R2.table.csv:
+    command: fun.R2.table.surv("download/data.seedling.survival.csv")
 
   output/herb.res.delta.SWC.Rdata:
     command: fun.herb.clim.jags(1, 'download/data.climate.all.csv')
@@ -99,6 +140,36 @@ targets:
   output/canop.res.cover.Rdata:
     command: fun.canop.cover.jags('download/data.herb.light.csv')
 
+  output/survival.res.Pinus.uncinata.Rdata:
+    command: fun.surv.jags(1, "download/data.seedling.survival.csv")
+
+  output/survival.res.Larix.decidua.Rdata:
+    command: fun.surv.jags(2, "download/data.seedling.survival.csv")
+
+  output/survival.res.Abies.alba.Rdata:
+    command: fun.surv.jags(3, "download/data.seedling.survival.csv")
+
+  output/survival.res.Fagus.sylvatica.Rdata:
+    command: fun.surv.jags(4, "download/data.seedling.survival.csv")
+
+  output/survival.res.Quercus.petraea.Rdata:
+    command: fun.surv.jags(5, "download/data.seedling.survival.csv")
+
+  output/growth.res.Pinus.uncinata.Rdata:
+    command: fun.growth.jags(1, "download/data.seedling.growth.csv")
+
+  output/growth.res.Larix.decidua.Rdata:
+    command: fun.growth.jags(2, "download/data.seedling.growth.csv")
+
+  output/growth.res.Abies.alba.Rdata:
+    command: fun.growth.jags(3, "download/data.seedling.growth.csv")
+
+  output/growth.res.Fagus.sylvatica.Rdata:
+    command: fun.growth.jags(4, "download/data.seedling.growth.csv")
+
+  output/growth.res.Quercus.petraea.Rdata:
+    command: fun.growth.jags(5, "download/data.seedling.growth.csv")
+
   download/data.clim.mean.csv:
     download: "http://datadryad.org/bitstream/handle/10255/dryad.94719/data.clim.mean.csv"
 
@@ -112,4 +183,4 @@ targets:
     download: "http://datadryad.org/bitstream/handle/10255/dryad.94693/data.seedling.survival.csv"
 
   download/data.seedling.growth.csv:
-    download: "http://datadryad.org/bitstream/handle/10255/dryad.94693/data.seedling.growth.csv"
+    download: "http://datadryad.org/bitstream/handle/10255/dryad.94698/data.seedling.growth.csv"

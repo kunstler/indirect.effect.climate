@@ -2,10 +2,10 @@
 ####################################
 ## Analyse of effect on climatic variables
 ## Defossez et al. Oikos in revision
-Sys.setlocale('LC_ALL','C') 
+Sys.setlocale('LC_ALL','C')
 
 ## read data
-fun.canop.clim.jags <- function(var.n, 
+fun.canop.clim.jags <- function(var.n,
                                 clim.data.name,
                                 vars.clim = c('SWC_effect', 'VPD_effect', 'Tmin_effect'),
                                 output.dir = 'output',
@@ -149,7 +149,7 @@ fun.predict.plot.canop <- function(clim.data.name,data.herb.light.name, vars.cli
                                jags.model.dir = 'jags.model'){
 ylab.vec <- c("Site centred SWC (%)",
               "Site centred VPD (Pa)",
-              "Site centred Tmin °C")
+              expression(paste0('Site centred Tmin ',degree,'C')))
 names(ylab.vec) <- vars.clim
 lab.vec <- c('(a)', '(b)', '(c)')
 names(lab.vec) <- vars.clim

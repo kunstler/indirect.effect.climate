@@ -5,8 +5,9 @@
 ## Defossez et al. Oikos in revision
 
 fun.surv.jags <- function(sp.n, data.seedling.survival.name,
-                          species = c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
-             "Fagus.sylvatica", "Quercus.petraea"),
+                          species = c( "Pinus.uncinata", "Larix.decidua",
+                              "Abies.alba", "Fagus.sylvatica",
+                              "Quercus.petraea"),
                           jags.model.dir = 'jags.model',
                           output.dir = 'output'){
 library(R2jags)
@@ -82,11 +83,11 @@ if(any(Survival.inter$BUGSoutput$summary[, 'Rhat']>1.1)) stop('badconvergence Rh
 }
 
 
-fun.dic.table.canop <- function(species = c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
-             "Fagus.sylvatica", "Quercus.petraea"),
+fun.dic.table.surv <- function(species = c( "Pinus.uncinata", "Larix.decidua",
+                                "Abies.alba","Fagus.sylvatica",
+                                "Quercus.petraea"),
                                output.dir = 'output',
                                jags.model.dir = 'jags.model'){
-
 ## BUILD DIC TABLE
 SURVIVAL.DIC.table <- matrix(NA,nrow=length(species),ncol=3)
 rownames(SURVIVAL.DIC.table) <- species
@@ -108,7 +109,7 @@ write.csv(SURVIVAL.DIC.table,file.path(output.dir, "SURVIVAL.DIC.table.csv"))
 
 
 
-fun.R2.table.canop <- function(data.seedling.survival.name,
+fun.R2.table.surv <- function(data.seedling.survival.name,
                               species = c("Pinus.uncinata", "Larix.decidua",
                                           "Abies.alba", "Fagus.sylvatica",
                                           "Quercus.petraea"),
@@ -148,9 +149,10 @@ write.csv(SURVIVAL.R2.table,file.path(output.dir, "SURVIVAL.R2.table.csv"))
 #######################################
 #### Predict interaction coeffcient
 
-fun.surv.jags <- function( data.seedling.survival.name,
-                          species = c( "Pinus.uncinata", "Larix.decidua", "Abies.alba",
-             "Fagus.sylvatica", "Quercus.petraea"),
+fun.surv.plot <- function( data.seedling.survival.name,
+                          species = c( "Pinus.uncinata", "Larix.decidua",
+                              "Abies.alba","Fagus.sylvatica",
+                              "Quercus.petraea"),
                           jags.model.dir = 'jags.model',
                           output.dir = 'output'){
 
@@ -163,10 +165,6 @@ data.survival <- subset(data.survival, !is.na(dds))# DDS
 data.survival <- subset(data.survival, !is.na(seedlings_survival))# survival
 
 
-# NUMBER OF CHAINS TO RUN
-nchains <-  4
- #### format data per species
- jags.data <- format.data.survival(sp, data.survival)
 
 
 for (j in species)
@@ -205,12 +203,14 @@ df.tot <- do.call('rbind',
                          format.df,
                          species[-5],
                          species.lat,
-                         "obj.plot.survival")
+                         "obj.plot.survival",
+                         output.dir)
                   )
 # get good order of param for plot
 neworder <- c("Ground vegetation direct", "Canopy direct", "Canopy indirect")
 df.tot$param <- factor(df.tot$param,levels=neworder)
-levels(df.tot$param) <- c("Ground vegetation direct effect", "Canopy direct effect", "Canopy indirect effect")
+levels(df.tot$param) <- c("Ground vegetation direct effect",
+                          "Canopy direct effect", "Canopy indirect effect")
 
 
 ## Figure 3: parameters of survival model f(SGDD)

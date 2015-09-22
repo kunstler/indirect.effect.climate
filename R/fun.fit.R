@@ -2,7 +2,7 @@
 ##########################
 ## FUNCTIONS FOR JAGS FIT
 
-jags.dir <- 'jags.model'
+jags.dir <- '../jags.model'
 dir.create(jags.dir, showWarnings = FALSE)
 
 
@@ -346,7 +346,7 @@ return(data.frame(temp= temp.plot,
 
 
 
-format.df <-  function(i, sp.run2, species.lat, name.obj){
+format.df <-  function(i, sp.run2, species.lat, name.obj, output.dir){
     load(file.path(output.dir, paste0(name.obj,sp.run2[i])))
     df <- data.frame(do.call('rbind', obj.plot),
                      param = c(rep('Ground vegetation direct', nrow(obj.plot[[1]])),
