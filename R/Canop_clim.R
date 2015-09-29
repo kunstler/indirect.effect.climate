@@ -7,7 +7,8 @@ Sys.setlocale('LC_ALL','C')
 ## read data
 fun.canop.clim.jags <- function(var.n,
                                 clim.data.name,
-                                vars.clim = c('SWC_effect', 'VPD_effect', 'Tmin_effect'),
+                                vars.clim = c('SWC_effect', 'VPD_effect',
+                                    'Tmin_effect'),
                                 output.dir = 'output',
                                 jags.model.dir = 'jags.model'){
 library(R2jags)
@@ -121,7 +122,8 @@ jags.data <- format.jags.data.herb(data.herb.light, 'cover')
  ### SEND to jags
  clim.L <-jags(data=jags.data,
                         inits=jags.inits,
-                        model.file = file.path(jags.dir, "jags.model.clim.L"),
+                        model.file = file.path(jags.model.dir,
+                            "jags.model.clim.L"),
                         parameters.to.save = c("param","tauC"),
                         n.chains = nchains,
                         n.iter = 70000,
