@@ -103,18 +103,46 @@ targets:
 
   output/CANOPY.DIC.table.csv:
     command: fun.dic.table.canop()
+    depends:
+    - output/canop.res.SWC_effect.Rdata
+    - output/canop.res.VPD_effect.Rdata
+    - output/canop.res.Tmin_effect.Rdata
+    - output/canop.res.cover.Rdata
 
   output/HERB.DIC.table.csv:
     command: fun.dic.table.herb()
+    depends:
+    - output/herb.res.delta.SWC.Rdata
+    - output/herb.res.delta.VPD.Rdata
+    - output/herb.res.delta.Tmin.Rdata
+    - output/herb.res.light.Rdata
 
   output/SURVIVAL.DIC.table.csv:
     command: fun.dic.table.surv()
+    depends:
+    - output/survival.res.Pinus.uncinata.Rdata
+    - output/survival.res.Larix.decidua.Rdata
+    - output/survival.res.Abies.alba.Rdata
+    - output/survival.res.Fagus.sylvatica.Rdata
+    - output/survival.res.Quercus.petraea.Rdata
 
   output/GROWTH.DIC.table.csv:
     command: fun.dic.table.growth()
+    depends:
+    - output/growth.res.Pinus.uncinata.Rdata
+    - output/growth.res.Larix.decidua.Rdata
+    - output/growth.res.Abies.alba.Rdata
+    - output/growth.res.Fagus.sylvatica.Rdata
+    - output/growth.res.Quercus.petraea.Rdata
 
   output/SURVIVAL.R2.table.csv:
     command: fun.R2.table.surv("download/data.seedling.survival.csv")
+    depends:
+    - output/survival.res.Pinus.uncinata.Rdata
+    - output/survival.res.Larix.decidua.Rdata
+    - output/survival.res.Abies.alba.Rdata
+    - output/survival.res.Fagus.sylvatica.Rdata
+    - output/survival.res.Quercus.petraea.Rdata
 
   output/herb.res.delta.SWC.Rdata:
     command: fun.herb.clim.jags(1, 'download/data.climate.all.csv')
