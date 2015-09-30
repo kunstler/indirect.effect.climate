@@ -19,6 +19,7 @@ The R code will download the data from dryad, run the jags analysis
 and create the output tables and figures.
 
 ```r
+Sys.setlocale('LC_ALL','C')
 remake::make('all')
 ```
 

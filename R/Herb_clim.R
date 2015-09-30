@@ -2,8 +2,6 @@
 ####################################
 ## Analyse of effect on climatic variables
 ## Defossez et al. Oikos in revision
-Sys.setlocale('LC_ALL','C') 
-
 
 ## read data
 fun.herb.clim.jags <- function(var.n,

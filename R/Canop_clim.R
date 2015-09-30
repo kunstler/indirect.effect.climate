@@ -2,7 +2,6 @@
 ####################################
 ## Analyse of effect on climatic variables
 ## Defossez et al. Oikos in revision
-Sys.setlocale('LC_ALL','C')
 
 ## read data
 fun.canop.clim.jags <- function(var.n,
