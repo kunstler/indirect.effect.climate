@@ -1,4 +1,4 @@
-# Script for JAGS analysis of Defossez et al. accepted Oikos
+# Script for JAGS analysis of Defossez et al. 2015 Oikos
 
 This repository list the files used in the analysis of ground vegetation and
 adult canopy direct and indirect effect on tree seedlings survival and growth
